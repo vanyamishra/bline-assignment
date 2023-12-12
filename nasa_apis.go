@@ -19,72 +19,32 @@ func main() {
 	client := &http.Client{}
 
 	//Adding mapping for Astronomy Picture of the Day API
-	const mappingApod = "/apod"
-	const apiUrlApod = baseUrl + "/planetary/apod"
-	CreateExternalGetAPIMapping(client, router, apiUrlApod, mappingApod)
+	router.GET("nasa/apod", func(c *gin.Context) {
+		HandleExternalAPICall(c, client, router, baseUrl+"/planetary/apod", "nasa/apod")
+	})
 
 	//Adding mapping for Mars Rover Photos API
-	const mappingMarsRoverPhotos = "/mars-rover-photos/:earth_date"
-	const apiUrlMarsRoverPhotos = baseUrl + "/mars-photos/api/v1/rovers/curiosity/photos"
-	const paramName = "earth_date"
-	CreateExternalGetAPIMappingWithParameter(client, router, apiUrlMarsRoverPhotos, mappingMarsRoverPhotos, paramName)
+	router.GET("nasa/mars-rover-photos/:earth_date", func(c *gin.Context) {
+		HandleExternalAPICallWithParameter(c, client, router, baseUrl+"/mars-photos/api/v1/rovers/curiosity/photos", "nasa/mars-rover-photos/:earth_date", "earth_date")
+	})
 
 	router.Run(":8080")
 }
 
-func CreateExternalGetAPIMapping(client *http.Client, router *gin.Engine, url string, mapping string) {
-	router.GET(mapping, func(c *gin.Context) {
-		HandleAPICall(c, client, router, url, mapping)
-	})
-}
-
-func CreateExternalGetAPIMappingWithParameter(client *http.Client, router *gin.Engine, url string, mapping string, paramName string) {
-	router.GET(mapping, func(c *gin.Context) {
-		HandleAPICallWithParameter(c, client, router, url, mapping, paramName)
-	})
-}
-
-func HandleAPICall(c *gin.Context, client *http.Client, router *gin.Engine, url string, mapping string) {
+func HandleExternalAPICall(c *gin.Context, client *http.Client, router *gin.Engine, url string, mapping string) {
 	requestURL := fmt.Sprintf("%s?api_key=%s", url, apiKey)
-	req, err := CreateRequest(requestURL)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the API request"})
-		return
-	}
-
-	resp, err := SendRequest(client, req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the API request"})
-		return
-	}
-	defer resp.Body.Close()
-
-	HandleAPIResponse(c, resp)
+	ManageRequest(c, client, requestURL)
 }
 
-func HandleAPICallWithParameter(c *gin.Context, client *http.Client, router *gin.Engine, url string, mapping string, paramName string) {
+func HandleExternalAPICallWithParameter(c *gin.Context, client *http.Client, router *gin.Engine, url string, mapping string, paramName string) {
 	paramValue := c.Param(paramName)
 	error := ValidateParam(paramName, paramValue)
 	if error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
 		return
 	}
-
 	requestURL := fmt.Sprintf("%s?%s=%s&api_key=%s", url, paramName, paramValue, apiKey)
-	req, err := CreateRequest(requestURL)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the API request"})
-		return
-	}
-
-	resp, err := SendRequest(client, req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the API request"})
-		return
-	}
-	defer resp.Body.Close()
-
-	HandleAPIResponse(c, resp)
+	ManageRequest(c, client, requestURL)
 }
 
 func CreateRequest(requestURL string) (*http.Request, error) {
@@ -99,7 +59,7 @@ func SendRequest(client *http.Client, req *http.Request) (*http.Response, error)
 	return client.Do(req)
 }
 
-func HandleAPIResponse(c *gin.Context, resp *http.Response) {
+func HandleExternalAPIResponse(c *gin.Context, resp *http.Response) {
 	if resp.StatusCode == http.StatusOK {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -122,4 +82,21 @@ func ValidateParam(paramName string, paramValue string) error {
 		}
 	}
 	return nil
+}
+
+func ManageRequest(c *gin.Context, client *http.Client, requestURL string) {
+	req, err := CreateRequest(requestURL)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the API request"})
+		return
+	}
+
+	resp, err := SendRequest(client, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the API request"})
+		return
+	}
+	defer resp.Body.Close()
+
+	HandleExternalAPIResponse(c, resp)
 }

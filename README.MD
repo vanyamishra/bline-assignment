@@ -21,7 +21,7 @@ Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-
 
 Now, you can run the following commands from a different terminal window.
 
-`curl http://localhost:8080/apod`
+`curl http://localhost:8080/nasa/apod`
 
 If no errors occur, you should see the required JSON output on the terminal. A sample output is as follows:
 ```
@@ -34,7 +34,7 @@ The above URL does not require any request parameters. However, the URL to view 
 
 The `earth_date` must be in the `YYYY-MM-DD` format. For example,
 
-`curl http://localhost:8080/mars-rover-photos/2022-09-08`
+`curl http://localhost:8080/nasa/mars-rover-photos/2022-09-09`
 
 If no errors occur, you should see the required JSON output on the terminal. A sample output is as follows:
 ```
