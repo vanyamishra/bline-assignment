@@ -16,12 +16,12 @@ func main() {
 	router := gin.Default()
 	client := &http.Client{}
 
-	//Adding mapping for Astronomy Picture of the Day
+	//Adding mapping for Astronomy Picture of the Day API
 	const mappingApod = "/apod"
 	const apiUrlApod = baseUrl + "/planetary/apod"
 	createExternalGetAPIMapping(client, router, apiUrlApod, mappingApod)
 
-	//Adding mapping for Mars Rover Photos
+	//Adding mapping for Mars Rover Photos API
 	const mappingMarsRoverPhotos = "/mars-rover-photos/:earth_date"
 	const apiUrlMarsRoverPhotos = baseUrl + "/mars-photos/api/v1/rovers/curiosity/photos"
 	const paramName = "earth_date"
@@ -36,14 +36,14 @@ func createExternalGetAPIMapping(client *http.Client, router *gin.Engine, url st
 		//Create the GET request
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s?api_key=%s", url, apiKey), nil)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the API request"})
 			return
 		}
 
 		//Send the request
 		resp, err := client.Do(req)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to make request"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the API request"})
 			return
 		}
 		defer resp.Body.Close()
@@ -52,10 +52,10 @@ func createExternalGetAPIMapping(client *http.Client, router *gin.Engine, url st
 		if resp.StatusCode == http.StatusOK {
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response body"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read the response body"})
 				return
 			}
-			c.JSON(http.StatusOK, gin.H{"data": string(body)})
+			c.JSON(http.StatusOK, gin.H{"result": string(body)})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error: %d - %s", resp.StatusCode, resp.Status)})
 		}
@@ -70,14 +70,14 @@ func createExternalGetAPIMappingWithParameter(client *http.Client, router *gin.E
 		//Create the GET request
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s?%s=%s&api_key=%s", url, paramName, paramValue, apiKey), nil)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the API request"})
 			return
 		}
 
 		//Send the request
 		resp, err := client.Do(req)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to make request"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the API request"})
 			return
 		}
 		defer resp.Body.Close()
@@ -86,10 +86,10 @@ func createExternalGetAPIMappingWithParameter(client *http.Client, router *gin.E
 		if resp.StatusCode == http.StatusOK {
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response body"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read the response body"})
 				return
 			}
-			c.JSON(http.StatusOK, gin.H{"data": string(body)})
+			c.JSON(http.StatusOK, gin.H{"result": string(body)})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error: %d - %s", resp.StatusCode, resp.Status)})
 		}

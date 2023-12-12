@@ -26,7 +26,7 @@ The above URL does not require any request parameters. However, the URL to view 
 
 `curl http://localhost:8080/mars-rover-photos/<earth_date>`
 
-The `earth_date`` must be in the `DDDD-MM-YY` format. For example,
+The `earth_date` must be in the `DDDD-MM-YY` format. For example,
 
 `curl http://localhost:8080/mars-rover-photos/2023-11-30`
 
