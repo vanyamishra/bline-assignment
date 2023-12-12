@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -68,8 +69,10 @@ func createExternalGetAPIMappingWithParameter(client *http.Client, router *gin.E
 		//Retrieve a single parameter
 		paramValue := c.Param(paramName)
 
-		if !validateParam(paramName, paramValue) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Incorrect earth_date format. Please enter the earth_date in YYYY-MM-DD"})
+		//Validate the parameter
+		error := validateParam(paramName, paramValue)
+		if error != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
 			return
 		}
 
@@ -102,12 +105,14 @@ func createExternalGetAPIMappingWithParameter(client *http.Client, router *gin.E
 	})
 }
 
-func validateParam(paramName string, paramValue string) bool {
+func validateParam(paramName string, paramValue string) error {
 	if paramName == "earth_date" {
 		// Define a regular expression pattern for "YYYY-MM-DD"
 		datePattern := "^\\d{4}-\\d{2}-\\d{2}$"
 		regex := regexp.MustCompile(datePattern)
-		return regex.MatchString(paramValue)
+		if !regex.MatchString(paramValue) {
+			return errors.New("Incorrect earth_date format. Please enter the earth_date in YYYY-MM-DD")
+		}
 	}
-	return false
+	return nil
 }

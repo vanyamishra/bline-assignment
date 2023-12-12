@@ -22,7 +22,7 @@ Now, you can run the following commands from a different terminal window.
 
 You should see the required JSON output on the terminal. A sample output is as follows:
 ```
-<sample output>
+{"result":"{\"copyright\":\"\\nGiulio Cobianchi\\n\",\"date\":\"2023-12-12\",\"explanation\":\"What are these two giant arches across the sky? Perhaps the more familiar one, on the left, is the central band of our Milky Way Galaxy. This grand disk of stars and nebulas here appears to encircle much of the southern sky. Visible below the stellar arch is the rusty-orange planet Mars and the extended Andromeda galaxy. But this night had more!  For a few minutes during this cold arctic night, a second giant arch appeared  encircling part of the northern sky: an aurora. Auroras are much closer than stars as they are composed of glowing air high in Earth's atmosphere.  Visible outside the green auroral arch is the group of stars popularly known as the Big Dipper.  The featured digital composite of 20 images was captured in mid-November 2022 over the Lofoten Islands in Norway.    APOD Year in Review (2023): RJN's Night Sky Network Lecture\",\"hdurl\":\"https://apod.nasa.gov/apod/image/2312/ArcticNight_Cobianchi_2048.jpg\",\"media_type\":\"image\",\"service_version\":\"v1\",\"title\":\"Aurora and Milky Way over Norway\",\"url\":\"https://apod.nasa.gov/apod/image/2312/ArcticNight_Cobianchi_1080.jpg\"}\n"}
 ```
 
 The above URL does not require any request parameters. However, the URL to view the mars rover photos requires a request parameter. The URL for viewing the mars rover photos must have the following format,
@@ -31,11 +31,11 @@ The above URL does not require any request parameters. However, the URL to view 
 
 The `earth_date` must be in the `YYYY-MM-DD` format. For example,
 
-`curl http://localhost:8080/mars-rover-photos/2023-11-30`
+`curl http://localhost:8080/mars-rover-photos/2022-09-08`
 
 You should see the required JSON output on the terminal. A sample output is as follows:
 ```
-<sample output>
+{"result":"{\"photos\":[]}"}
 ```
 
 Alternatively, you can skip the `curl` command and copy-paste the same commands on a browser window to view the same results.
