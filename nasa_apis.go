@@ -21,32 +21,33 @@ func main() {
 	//Adding mapping for Astronomy Picture of the Day API
 	router.GET("nasa/apod", func(c *gin.Context) {
 		requestURL := fmt.Sprintf("%s?api_key=%s", baseUrl+"/planetary/apod", apiKey)
-		ManageRequest(c, client, requestURL)
+		ManageExternalAPIRequest(c, client, requestURL)
 	})
 
 	//Adding mapping for Mars Rover Photos API
 	router.GET("nasa/mars-rover-photos/:earth_date", func(c *gin.Context) {
-		paramValue := c.Param("earth_date")
-		error := ValidateParam("earth_date", paramValue)
+		paramName := "earth_date"
+		paramValue := c.Param(paramName)
+		error := ValidateParam(paramName, paramValue)
 		if error != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
 			return
 		}
-		requestURL := fmt.Sprintf("%s?%s=%s&api_key=%s", baseUrl+"/mars-photos/api/v1/rovers/curiosity/photos", "earth_date", paramValue, apiKey)
-		ManageRequest(c, client, requestURL)
+		requestURL := fmt.Sprintf("%s?%s=%s&api_key=%s", baseUrl+"/mars-photos/api/v1/rovers/curiosity/photos", paramName, paramValue, apiKey)
+		ManageExternalAPIRequest(c, client, requestURL)
 	})
 
 	router.Run(":8080")
 }
 
-func ManageRequest(c *gin.Context, client *http.Client, requestURL string) {
-	req, err := CreateRequest(requestURL)
+func ManageExternalAPIRequest(c *gin.Context, client *http.Client, requestURL string) {
+	req, err := CreateExternalRequest(requestURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the API request"})
 		return
 	}
 
-	resp, err := SendRequest(client, req)
+	resp, err := SendExternalAPIRequest(client, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the API request"})
 		return
@@ -56,7 +57,7 @@ func ManageRequest(c *gin.Context, client *http.Client, requestURL string) {
 	HandleExternalAPIResponse(c, resp)
 }
 
-func CreateRequest(requestURL string) (*http.Request, error) {
+func CreateExternalRequest(requestURL string) (*http.Request, error) {
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
 		return nil, err
@@ -64,7 +65,7 @@ func CreateRequest(requestURL string) (*http.Request, error) {
 	return req, nil
 }
 
-func SendRequest(client *http.Client, req *http.Request) (*http.Response, error) {
+func SendExternalAPIRequest(client *http.Client, req *http.Request) (*http.Response, error) {
 	return client.Do(req)
 }
 
