@@ -19,3 +19,15 @@ func AcceptUserInput(promptMessage string) string {
 
 	return result
 }
+
+func CreateHttpRequest() {
+
+}
+
+func SendHttpRequest() {
+
+}
+
+func ReadResponse() {
+
+}

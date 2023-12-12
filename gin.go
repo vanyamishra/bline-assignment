@@ -8,27 +8,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TODO: Add this to an environment variable
-const apiKey = "4ecExbMPdGdE4k2WBbhK3RW3fXrqX9sA6CWtCkYm"
-const apiUrlApod = "https://api.nasa.gov/planetary/apod"
-const apiUrlMarsRover = "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos"
-
 func main() {
 
 	router := gin.Default()
+	client := &http.Client{}
 
-	callExternalAPIWithParameters(router)
+	const apiKey = "4ecExbMPdGdE4k2WBbhK3RW3fXrqX9sA6CWtCkYm"
 
-	callExternalAPI(router)
+	const mappingApod = "/apod"
+	const apiUrlApod = "https://api.nasa.gov/planetary/apod"
+	createExternalGetAPIMappingWithAPIKey(client, router, apiUrlApod, apiKey, mappingApod)
+
+	const mappingMarsRover = "/marsrover"
+	const apiUrlMarsRover = "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos"
+	const paramName = "earth_date"
+	const promptMessage = "Please enter the earth date in YYYY-MM-DD format to retrieve the Mars Rover Photos."
+	createExternalGetAPIMappingWithAPIKeyAndParameter(client, router, apiUrlMarsRover, apiKey, mappingMarsRover, promptMessage, paramName)
 
 	router.Run(":8080")
 }
 
-func callExternalAPI(router *gin.Engine) {
-	router.GET("/apod", func(c *gin.Context) {
-		client := &http.Client{}
-
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s?api_key=%s", apiUrlApod, apiKey), nil)
+func createExternalGetAPIMappingWithAPIKey(client *http.Client, router *gin.Engine, url string, apiKey string, mapping string) {
+	router.GET(mapping, func(c *gin.Context) {
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s?api_key=%s", url, apiKey), nil)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
 			return
@@ -55,13 +57,16 @@ func callExternalAPI(router *gin.Engine) {
 	})
 }
 
-func callExternalAPIWithParameters(router *gin.Engine) {
-	router.GET("/marsrover", func(c *gin.Context) {
-		client := &http.Client{}
+func createExternalGetAPIMappingWithAPIKeyAndParameter(client *http.Client, router *gin.Engine, url string, apiKey string, mapping string, promptMessage string, paramName string) {
+	router.GET(mapping, func(c *gin.Context) {
 
-		earthDate := AcceptUserInput("Please enter the earth date in YYYY-MM-DD format to retrieve the Mars Rover Photos.")
+		paramValue := AcceptUserInput(paramName)
+		if paramValue == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "The request parameter is incorrect."})
+			return
+		}
 
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s?earth_date=%s&api_key=%s", apiUrlMarsRover, earthDate, apiKey), nil)
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s?%s=%s&api_key=%s", url, paramName, paramValue, apiKey), nil)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
 			return
