@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,19 +15,16 @@ const apiUrlMarsRover = "https://api.nasa.gov/mars-photos/api/v1/rovers/curiosit
 
 func main() {
 
-	// Prompt the user to enter a string
-	fmt.Println("Please enter the earth date in YYYY-MM-DD format to retrieve the Mars Rover Photos.")
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	if err := scanner.Err(); err != nil {
-		fmt.Println("Error reading input: ", err)
-		return
-	}
-	earthDate := scanner.Text()
-	fmt.Println("You entered: ", earthDate)
-
 	router := gin.Default()
 
+	callExternalAPIWithParameters(router)
+
+	callExternalAPI(router)
+
+	router.Run(":8080")
+}
+
+func callExternalAPI(router *gin.Engine) {
 	router.GET("/apod", func(c *gin.Context) {
 		client := &http.Client{}
 
@@ -58,12 +53,14 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error: %d - %s", resp.StatusCode, resp.Status)})
 		}
 	})
+}
 
+func callExternalAPIWithParameters(router *gin.Engine) {
 	router.GET("/marsrover", func(c *gin.Context) {
 		client := &http.Client{}
 
-		//TODO: Accept this from the user
-		//earthDate := "2015-6-3"
+		earthDate := AcceptUserInput("Please enter the earth date in YYYY-MM-DD format to retrieve the Mars Rover Photos.")
+
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s?earth_date=%s&api_key=%s", apiUrlMarsRover, earthDate, apiKey), nil)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
@@ -89,5 +86,4 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error: %d - %s", resp.StatusCode, resp.Status)})
 		}
 	})
-	router.Run(":8080")
 }
