@@ -20,16 +20,22 @@ Now, you can run the following commands from a different terminal window.
 
 `curl http://localhost:8080/apod`
 
-You should see the required JSON output on the terminal.
+You should see the required JSON output on the terminal. A sample output is as follows:
+```
+<sample output>
+```
 
 The above URL does not require any request parameters. However, the URL to view the mars rover photos requires a request parameter. The URL for viewing the mars rover photos must have the following format,
 
 `curl http://localhost:8080/mars-rover-photos/<earth_date>`
 
-The `earth_date` must be in the `DDDD-MM-YY` format. For example,
+The `earth_date` must be in the `YYYY-MM-DD` format. For example,
 
 `curl http://localhost:8080/mars-rover-photos/2023-11-30`
 
-You should see the required JSON output on the terminal.
+You should see the required JSON output on the terminal. A sample output is as follows:
+```
+<sample output>
+```
 
 Alternatively, you can skip the `curl` command and copy-paste the same commands on a browser window to view the same results.

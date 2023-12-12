@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -67,6 +68,11 @@ func createExternalGetAPIMappingWithParameter(client *http.Client, router *gin.E
 		//Retrieve a single parameter
 		paramValue := c.Param(paramName)
 
+		if !validateParam(paramName, paramValue) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Incorrect earth_date format. Please enter the earth_date in YYYY-MM-DD"})
+			return
+		}
+
 		//Create the GET request
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s?%s=%s&api_key=%s", url, paramName, paramValue, apiKey), nil)
 		if err != nil {
@@ -94,4 +100,14 @@ func createExternalGetAPIMappingWithParameter(client *http.Client, router *gin.E
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error: %d - %s", resp.StatusCode, resp.Status)})
 		}
 	})
+}
+
+func validateParam(paramName string, paramValue string) bool {
+	if paramName == "earth_date" {
+		// Define a regular expression pattern for "YYYY-MM-DD"
+		datePattern := "^\\d{4}-\\d{2}-\\d{2}$"
+		regex := regexp.MustCompile(datePattern)
+		return regex.MatchString(paramValue)
+	}
+	return false
 }
