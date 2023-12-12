@@ -16,20 +16,22 @@ func main() {
 	router := gin.Default()
 	client := &http.Client{}
 
+	//Adding mapping for Astronomy Picture of the Day
 	const mappingApod = "/apod"
 	const apiUrlApod = baseUrl + "/planetary/apod"
-	createExternalGetAPIMappingWithAPIKey(client, router, apiUrlApod, apiKey, mappingApod)
+	createExternalGetAPIMapping(client, router, apiUrlApod, mappingApod)
 
-	const mappingMarsRover = "/marsrover/:earthDate"
-	const apiUrlMarsRover = baseUrl + "/mars-photos/api/v1/rovers/curiosity/photos"
+	//Adding mapping for Mars Rover Photos
+	const mappingMarsRoverPhotos = "/mars-rover-photos/:earth_date"
+	const apiUrlMarsRoverPhotos = baseUrl + "/mars-photos/api/v1/rovers/curiosity/photos"
 	const paramName = "earth_date"
 	const promptMessage = "Please enter the earth date in YYYY-MM-DD format to retrieve the Mars Rover Photos."
-	createExternalGetAPIMappingWithAPIKeyAndParameter(client, router, apiUrlMarsRover, apiKey, mappingMarsRover, promptMessage, paramName)
+	createExternalGetAPIMappingWithParameter(client, router, apiUrlMarsRoverPhotos, mappingMarsRoverPhotos, promptMessage, paramName)
 
 	router.Run(":8080")
 }
 
-func createExternalGetAPIMappingWithAPIKey(client *http.Client, router *gin.Engine, url string, apiKey string, mapping string) {
+func createExternalGetAPIMapping(client *http.Client, router *gin.Engine, url string, mapping string) {
 	router.GET(mapping, func(c *gin.Context) {
 		//Create the GET request
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s?api_key=%s", url, apiKey), nil)
@@ -60,16 +62,10 @@ func createExternalGetAPIMappingWithAPIKey(client *http.Client, router *gin.Engi
 	})
 }
 
-func createExternalGetAPIMappingWithAPIKeyAndParameter(client *http.Client, router *gin.Engine, url string, apiKey string, mapping string, promptMessage string, paramName string) {
+func createExternalGetAPIMappingWithParameter(client *http.Client, router *gin.Engine, url string, mapping string, promptMessage string, paramName string) {
 	router.GET(mapping, func(c *gin.Context) {
-		//Accept the additional parameter via user input
-		// paramValue := acceptUserInput(promptMessage)
-		// if paramValue == "" {
-		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "The request parameter is incorrect."})
-		// 	return
-		// }
-		paramValue := c.Param("earthDate")
-		fmt.Println(paramValue)
+		//Retrieve a single parameter
+		paramValue := c.Param(paramName)
 
 		//Create the GET request
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s?%s=%s&api_key=%s", url, paramName, paramValue, apiKey), nil)
@@ -86,6 +82,7 @@ func createExternalGetAPIMappingWithAPIKeyAndParameter(client *http.Client, rout
 		}
 		defer resp.Body.Close()
 
+		//Display the response
 		if resp.StatusCode == http.StatusOK {
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
