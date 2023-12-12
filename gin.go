@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -60,7 +62,7 @@ func createExternalGetAPIMappingWithAPIKey(client *http.Client, router *gin.Engi
 func createExternalGetAPIMappingWithAPIKeyAndParameter(client *http.Client, router *gin.Engine, url string, apiKey string, mapping string, promptMessage string, paramName string) {
 	router.GET(mapping, func(c *gin.Context) {
 
-		paramValue := AcceptUserInput(paramName)
+		paramValue := acceptUserInput(promptMessage)
 		if paramValue == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "The request parameter is incorrect."})
 			return
@@ -91,4 +93,18 @@ func createExternalGetAPIMappingWithAPIKeyAndParameter(client *http.Client, rout
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error: %d - %s", resp.StatusCode, resp.Status)})
 		}
 	})
+}
+
+func acceptUserInput(promptMessage string) string {
+	fmt.Println(promptMessage)
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading input: ", err)
+		return ""
+	}
+	result := scanner.Text()
+	fmt.Println("You entered: ", result)
+
+	return result
 }
