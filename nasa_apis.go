@@ -20,31 +20,40 @@ func main() {
 
 	//Adding mapping for Astronomy Picture of the Day API
 	router.GET("nasa/apod", func(c *gin.Context) {
-		HandleExternalAPICall(c, client, router, baseUrl+"/planetary/apod", "nasa/apod")
+		requestURL := fmt.Sprintf("%s?api_key=%s", baseUrl+"/planetary/apod", apiKey)
+		ManageRequest(c, client, requestURL)
 	})
 
 	//Adding mapping for Mars Rover Photos API
 	router.GET("nasa/mars-rover-photos/:earth_date", func(c *gin.Context) {
-		HandleExternalAPICallWithParameter(c, client, router, baseUrl+"/mars-photos/api/v1/rovers/curiosity/photos", "nasa/mars-rover-photos/:earth_date", "earth_date")
+		paramValue := c.Param("earth_date")
+		error := ValidateParam("earth_date", paramValue)
+		if error != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
+			return
+		}
+		requestURL := fmt.Sprintf("%s?%s=%s&api_key=%s", baseUrl+"/mars-photos/api/v1/rovers/curiosity/photos", "earth_date", paramValue, apiKey)
+		ManageRequest(c, client, requestURL)
 	})
 
 	router.Run(":8080")
 }
 
-func HandleExternalAPICall(c *gin.Context, client *http.Client, router *gin.Engine, url string, mapping string) {
-	requestURL := fmt.Sprintf("%s?api_key=%s", url, apiKey)
-	ManageRequest(c, client, requestURL)
-}
-
-func HandleExternalAPICallWithParameter(c *gin.Context, client *http.Client, router *gin.Engine, url string, mapping string, paramName string) {
-	paramValue := c.Param(paramName)
-	error := ValidateParam(paramName, paramValue)
-	if error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
+func ManageRequest(c *gin.Context, client *http.Client, requestURL string) {
+	req, err := CreateRequest(requestURL)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the API request"})
 		return
 	}
-	requestURL := fmt.Sprintf("%s?%s=%s&api_key=%s", url, paramName, paramValue, apiKey)
-	ManageRequest(c, client, requestURL)
+
+	resp, err := SendRequest(client, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the API request"})
+		return
+	}
+	defer resp.Body.Close()
+
+	HandleExternalAPIResponse(c, resp)
 }
 
 func CreateRequest(requestURL string) (*http.Request, error) {
@@ -82,21 +91,4 @@ func ValidateParam(paramName string, paramValue string) error {
 		}
 	}
 	return nil
-}
-
-func ManageRequest(c *gin.Context, client *http.Client, requestURL string) {
-	req, err := CreateRequest(requestURL)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create the API request"})
-		return
-	}
-
-	resp, err := SendRequest(client, req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send the API request"})
-		return
-	}
-	defer resp.Body.Close()
-
-	HandleExternalAPIResponse(c, resp)
 }
