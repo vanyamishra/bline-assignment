@@ -1,3 +1,5 @@
+Project Structure
+
 This project contains the following files (in addition to any boilerplate code required by any Go project):
 `nasa_apis.go`
 `nasa_apis_test.go`
@@ -5,12 +7,15 @@ This project contains the following files (in addition to any boilerplate code r
 The `nasa_apis.go` contains endpoint mappings for two external endpoints provided by NASA. These include the following:
 - https://api.nasa.gov/planetary/apod
 - https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos
-Functions have been added in this file in such a way that it becomes easier to add any similar mappings in the future. The main() function performs some checks on the values, but mostly supplies objects to these functions. The above endpoints require authentication by means of an `api_key` that has been added as a global member variable in the file.
+
+Functions have been added in this file in such a way that it becomes easier to add any similar mappings in the future. The main() function performs some checks on the values, but mostly supplies objects to these functions. The above endpoints require authentication using an `api_key` that has been added as a global member variable in the file.
 
 The `nasa_apis_test.go` file includes unit tests that validate the functions defined in the `nasa_apis.go` file. Although the unit tests do not provide 100% code coverage at this time, the code has been manually tested to account for multiple scenarios, which include:
 - The happy path scenario, where we receive a 200 response code with appropriate content in the response body.
 - Submitting a request with incorrect `api_key`, which results in a 403 (forbidden) response code.
 - Submitting `earth_date` in an incorrect format, which results in a 400 (bad request) response code.
+
+Steps to clone and run this project
 
 Clone the project using the appropriate command. For example, if you want to use HTTPS, the following command would work:
 
@@ -42,7 +47,7 @@ If no errors occur, you should see the required JSON output on the terminal. A s
 {"result":"{\"copyright\":\"\\nGiulio Cobianchi\\n\",\"date\":\"2023-12-12\",\"explanation\":\"What are these two giant arches across the sky? Perhaps the more familiar one, on the left, is the central band of our Milky Way Galaxy. This grand disk of stars and nebulas here appears to encircle much of the southern sky. Visible below the stellar arch is the rusty-orange planet Mars and the extended Andromeda galaxy. But this night had more!  For a few minutes during this cold arctic night, a second giant arch appeared  encircling part of the northern sky: an aurora. Auroras are much closer than stars as they are composed of glowing air high in Earth's atmosphere.  Visible outside the green auroral arch is the group of stars popularly known as the Big Dipper.  The featured digital composite of 20 images was captured in mid-November 2022 over the Lofoten Islands in Norway.    APOD Year in Review (2023): RJN's Night Sky Network Lecture\",\"hdurl\":\"https://apod.nasa.gov/apod/image/2312/ArcticNight_Cobianchi_2048.jpg\",\"media_type\":\"image\",\"service_version\":\"v1\",\"title\":\"Aurora and Milky Way over Norway\",\"url\":\"https://apod.nasa.gov/apod/image/2312/ArcticNight_Cobianchi_1080.jpg\"}\n"}
 ```
 
-The above URL does not require any request parameters. However, the URL to view the mars rover photos requires a request parameter. The URL for viewing the mars rover photos must have the following format,
+The above URL does not require any request parameters. However, the URL to view the Mars rover photos requires a request parameter. The URL for viewing the Mars rover photos must have the following format,
 
 `curl http://localhost:8080/mars-rover-photos/<earth_date>`
 
