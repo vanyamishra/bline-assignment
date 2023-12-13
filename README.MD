@@ -63,3 +63,9 @@ If no errors occur, you should see the required JSON output on the terminal. A s
 Alternatively, you can skip the `curl` command and copy-paste the same commands on a browser window to view the same results.
 
 Please note that you will see a different response in case of errors.
+
+# Running unit tests
+
+In order to run unit tests, please navigate to your project folder (`bline-assignment` in this case) and run the following command
+
+`go test ./...`
