@@ -5,9 +5,12 @@ This project contains the following files (in addition to any boilerplate code r
 The `nasa_apis.go` contains endpoint mappings for two external endpoints provided by NASA. These include the following:
 - https://api.nasa.gov/planetary/apod
 - https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos
-The functions in this file have been written in such a way that it is easier to add any similar mapping in the future. The above endpoints require authentication by means of an `api_key` that has been added as a global member variable in the file.
+Functions have been added in this file in such a way that it becomes easier to add any similar mappings in the future. The main() function performs some checks on the values, but mostly supplies objects to these functions. The above endpoints require authentication by means of an `api_key` that has been added as a global member variable in the file.
 
-The `nasa_apis_test.go` file includes unit tests that validate the functions defined in the `nasa_apis.go` file. The unit tests do not provide 100% code coverage at this time.
+The `nasa_apis_test.go` file includes unit tests that validate the functions defined in the `nasa_apis.go` file. Although the unit tests do not provide 100% code coverage at this time, the code has been manually tested to account for multiple scenarios, which include:
+- The happy path scenario, where we receive a 200 response code with appropriate content in the response body.
+- Submitting a request with incorrect `api_key`, which results in a 403 (forbidden) response code.
+- Submitting `earth_date` in an incorrect format, which results in a 400 (bad request) response code.
 
 Clone the project using the appropriate command. For example, if you want to use HTTPS, the following command would work:
 

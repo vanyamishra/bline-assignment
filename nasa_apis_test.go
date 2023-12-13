@@ -9,7 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// incorrect api key
+func TestManageExternalAPIRequestStatusOK(t *testing.T) {
+	//TODO: Add mocks around the methods that this calls
+	client := &http.Client{} //TODO: This should be mocked.
+	apiURL := "http://localhost:8080/sample"
+	body, status, err := manageAPIRequest(client, apiURL)
+	assert.NotNil(t, err)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Failed to send the API request")
+	assert.Empty(t, body)
+	assert.Equal(t, status, 500)
+}
 
 func TestManageExternalAPIRequestStatusInternalServerError(t *testing.T) {
 	client := &http.Client{} //TODO: This should be mocked.
@@ -36,7 +46,7 @@ func TestHandleAPIResponseError(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "Bad Gateway")
 	assert.Empty(t, body)
-	assert.Equal(t, status, 500)
+	assert.Equal(t, status, http.StatusBadGateway)
 }
 
 func TestHandleAPIResponseNoError(t *testing.T) {
