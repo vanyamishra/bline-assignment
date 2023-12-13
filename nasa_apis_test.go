@@ -21,7 +21,7 @@ func (ms *MockRequestSender) SendRequest(client *http.Client, req *http.Request)
 	return ms.MockResponse, ms.MockErr
 }
 
-func TestManageExternalAPIRequestStatusOK(t *testing.T) {
+func TestManageAPIRequestStatusOK(t *testing.T) {
 	client := &http.Client{}
 	apiURL := "http://localhost:8080/sample"
 	mockResponse := &http.Response{
@@ -36,7 +36,7 @@ func TestManageExternalAPIRequestStatusOK(t *testing.T) {
 	assert.Equal(t, status, 200)
 }
 
-func TestManageExternalAPIRequestStatusInternalServerError(t *testing.T) {
+func TestManageAPIRequestStatusInternalServerError(t *testing.T) {
 	client := &http.Client{} //TODO: This should be mocked.
 	apiURL := "http://localhost:8080/sample"
 	mockResponse := &http.Response{
