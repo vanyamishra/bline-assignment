@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// incorrect api key
+
 func TestManageExternalAPIRequestStatusInternalServerError(t *testing.T) {
 	client := &http.Client{} //TODO: This should be mocked.
 	apiURL := "http://localhost:8080/sample"

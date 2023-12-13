@@ -88,7 +88,7 @@ func handleAPIResponse(resp *http.Response) (string, int, error) {
 		}
 		return string(body), http.StatusOK, nil
 	} else {
-		return "", http.StatusInternalServerError, errors.New(fmt.Sprintf("Error: %d - %s", resp.StatusCode, resp.Status))
+		return "", resp.StatusCode, errors.New(fmt.Sprintf("Error: %d - %s", resp.StatusCode, resp.Status))
 	}
 }
 
