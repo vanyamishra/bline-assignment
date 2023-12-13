@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"net/http"
 	"testing"
@@ -9,25 +10,44 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// MockRequestSender is a mock implementation of RequestSender for testing purposes.
+type MockRequestSender struct {
+	MockResponse *http.Response
+	MockErr      error
+}
+
+// SendRequest sends a mock HTTP request.
+func (ms *MockRequestSender) SendRequest(client *http.Client, req *http.Request) (*http.Response, error) {
+	return ms.MockResponse, ms.MockErr
+}
+
 func TestManageExternalAPIRequestStatusOK(t *testing.T) {
-	//TODO: Add mocks around the methods that this calls
-	client := &http.Client{} //TODO: This should be mocked.
+	client := &http.Client{}
 	apiURL := "http://localhost:8080/sample"
-	body, status, err := manageAPIRequest(client, apiURL)
-	assert.NotNil(t, err)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Failed to send the API request")
-	assert.Empty(t, body)
-	assert.Equal(t, status, 500)
+	mockResponse := &http.Response{
+		Body:       io.NopCloser(bytes.NewBufferString("Mock API response")),
+		StatusCode: http.StatusOK,
+	}
+	mockRequestSender := &MockRequestSender{MockResponse: mockResponse, MockErr: nil}
+	body, status, err := manageAPIRequest(client, apiURL, mockRequestSender)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, body)
+	assert.Contains(t, body, "Mock API response")
+	assert.Equal(t, status, 200)
 }
 
 func TestManageExternalAPIRequestStatusInternalServerError(t *testing.T) {
 	client := &http.Client{} //TODO: This should be mocked.
 	apiURL := "http://localhost:8080/sample"
-	body, status, err := manageAPIRequest(client, apiURL)
+	mockResponse := &http.Response{
+		Body:       io.NopCloser(bytes.NewBufferString("Mock API response")),
+		StatusCode: http.StatusOK,
+	}
+	mockRequestSender := &MockRequestSender{MockResponse: mockResponse, MockErr: errors.New("some error")}
+	body, status, err := manageAPIRequest(client, apiURL, mockRequestSender)
 	assert.NotNil(t, err)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "Failed to send the API request")
+	assert.Contains(t, err.Error(), "some error")
 	assert.Empty(t, body)
 	assert.Equal(t, status, 500)
 }
@@ -81,29 +101,3 @@ func TestValidateParameterNonExistentParameter(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Nil(t, err)
 }
-
-// func TestMain(t *testing.T) {
-// 	router := gin.Default()
-
-// 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		// Simulate a successful API response with mock data
-// 		w.WriteHeader(http.StatusOK)
-// 		w.Write([]byte(`{"mock_key": "mock_value"}`))
-// 	}))
-// 	defer mockServer.Close()
-
-// 	apiURL := mockServer.URL + "/nasa/apod"
-// 	//baseUrl = mockServer.URL
-
-// 	req, err := http.NewRequest("GET", apiURL, nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	w := httptest.NewRecorder()
-// 	router.ServeHTTP(w, req)
-// 	assert.Equal(t, http.StatusOK, w.Code)
-
-// 	// expectedResponse := `{"data":"{\"mock_key\": \"mock_value\"}"}`
-// 	// assert.Equal(t, expectedResponse, w.Body.String())
-
-// }

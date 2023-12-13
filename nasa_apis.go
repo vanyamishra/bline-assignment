@@ -13,15 +13,33 @@ import (
 const apiKey = "4ecExbMPdGdE4k2WBbhK3RW3fXrqX9sA6CWtCkYm"
 const baseUrl = "https://api.nasa.gov"
 
+// RequestSender is an interface for creating HTTP requests.
+// Adding it as an interface allows unit tests to bypass a real HTTP call.
+type RequestSender interface {
+	SendRequest(client *http.Client, req *http.Request) (*http.Response, error)
+}
+
+// RealRequestSender is the real implementation of RequestSender.
+type RealRequestSender struct{}
+
+func (rs *RealRequestSender) SendRequest(client *http.Client, req *http.Request) (*http.Response, error) {
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, errors.New("Failed to send the API request")
+	}
+	return resp, nil
+}
+
 func main() {
 
 	router := gin.Default()
 	client := &http.Client{}
+	realRequestSender := &RealRequestSender{}
 
 	//Adding mapping for Astronomy Picture of the Day API
 	router.GET("nasa/apod", func(c *gin.Context) {
 		requestURL := fmt.Sprintf("%s?api_key=%s", baseUrl+"/planetary/apod", apiKey)
-		body, status, err := manageAPIRequest(client, requestURL)
+		body, status, err := manageAPIRequest(client, requestURL, realRequestSender)
 		if err != nil {
 			c.JSON(status, gin.H{"error": err.Error()})
 		} else {
@@ -39,7 +57,7 @@ func main() {
 			return
 		}
 		requestURL := fmt.Sprintf("%s?%s=%s&api_key=%s", baseUrl+"/mars-photos/api/v1/rovers/curiosity/photos", paramName, paramValue, apiKey)
-		body, status, err := manageAPIRequest(client, requestURL)
+		body, status, err := manageAPIRequest(client, requestURL, realRequestSender)
 		if err != nil {
 			c.JSON(status, gin.H{"error": err.Error()})
 		} else {
@@ -50,26 +68,18 @@ func main() {
 	router.Run(":8080")
 }
 
-func manageAPIRequest(client *http.Client, requestURL string) (string, int, error) {
+func manageAPIRequest(client *http.Client, requestURL string, rs RequestSender) (string, int, error) {
 	req, err := createRequest(requestURL)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
-	resp, err := sendRequest(client, req)
+	resp, err := rs.SendRequest(client, req)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
 	defer resp.Body.Close()
 	body, status, error := handleAPIResponse(resp)
 	return body, status, error
-}
-
-func sendRequest(client *http.Client, req *http.Request) (*http.Response, error) {
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, errors.New("Failed to send the API request")
-	}
-	return resp, nil
 }
 
 func createRequest(requestURL string) (*http.Request, error) {
