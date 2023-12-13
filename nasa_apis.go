@@ -55,14 +55,11 @@ func manageAPIRequest(client *http.Client, requestURL string) (string, int, erro
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
-
-	//Send request
 	resp, err := sendRequest(client, req)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
 	defer resp.Body.Close()
-
 	body, status, error := handleAPIResponse(resp)
 	return body, status, error
 }

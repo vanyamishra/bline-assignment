@@ -1,3 +1,14 @@
+This project contains the following files (in addition to any boilerplate code required by any Go project):
+`nasa_apis.go`
+`nasa_apis_test.go`
+
+The `nasa_apis.go` contains endpoint mappings for two external endpoints provided by NASA. These include the following:
+- https://api.nasa.gov/planetary/apod
+- https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos
+The functions in this file have been written in such a way that it is easier to add any similar mapping in the future. The above endpoints require authentication by means of an `api_key` that has been added as a global member variable in the file.
+
+The `nasa_apis_test.go` file includes unit tests that validate the functions defined in the `nasa_apis.go` file. The unit tests do not provide 100% code coverage at this time.
+
 Clone the project using the appropriate command. For example, if you want to use HTTPS, the following command would work:
 
 `git clone https://github.com/vanyamishra/bline-assignment`
