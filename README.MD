@@ -1,4 +1,4 @@
-Project Structure
+# Project Structure
 
 This project contains the following files (in addition to any boilerplate code required by any Go project):
 `nasa_apis.go`
@@ -15,7 +15,7 @@ The `nasa_apis_test.go` file includes unit tests that validate the functions def
 - Submitting a request with incorrect `api_key`, which results in a 403 (forbidden) response code.
 - Submitting `earth_date` in an incorrect format, which results in a 400 (bad request) response code.
 
-Steps to clone and run this project
+# Steps to clone and run this project
 
 Clone the project using the appropriate command. For example, if you want to use HTTPS, the following command would work:
 
