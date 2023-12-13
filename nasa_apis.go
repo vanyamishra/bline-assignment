@@ -21,11 +21,11 @@ func main() {
 	//Adding mapping for Astronomy Picture of the Day API
 	router.GET("nasa/apod", func(c *gin.Context) {
 		requestURL := fmt.Sprintf("%s?api_key=%s", baseUrl+"/planetary/apod", apiKey)
-		body, status, err := manageExternalAPIRequest(client, requestURL)
+		body, status, err := manageAPIRequest(client, requestURL)
 		if err != nil {
 			c.JSON(status, gin.H{"error": err.Error()})
 		} else {
-			c.JSON(http.StatusOK, gin.H{"result": body})
+			c.JSON(status, gin.H{"result": body})
 		}
 	})
 
@@ -39,18 +39,18 @@ func main() {
 			return
 		}
 		requestURL := fmt.Sprintf("%s?%s=%s&api_key=%s", baseUrl+"/mars-photos/api/v1/rovers/curiosity/photos", paramName, paramValue, apiKey)
-		body, status, err := manageExternalAPIRequest(client, requestURL)
+		body, status, err := manageAPIRequest(client, requestURL)
 		if err != nil {
 			c.JSON(status, gin.H{"error": err.Error()})
 		} else {
-			c.JSON(http.StatusOK, gin.H{"result": body})
+			c.JSON(status, gin.H{"result": body})
 		}
 	})
 
 	router.Run(":8080")
 }
 
-func manageExternalAPIRequest(client *http.Client, requestURL string) (string, int, error) {
+func manageAPIRequest(client *http.Client, requestURL string) (string, int, error) {
 	req, err := createRequest(requestURL)
 	if err != nil {
 		return "", http.StatusInternalServerError, err

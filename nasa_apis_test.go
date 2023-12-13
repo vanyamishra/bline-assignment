@@ -4,38 +4,15 @@ import (
 	"bytes"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateExternalRequest(t *testing.T) {
-	apiURL := "http://localhost:8080/sample"
-	req, err := createRequest(apiURL)
-	assert.NoError(t, err)
-	assert.NotNil(t, req)
-	assert.Equal(t, apiURL, req.URL.String())
-}
-
-func TestManageExternalAPIRequestStatusCodeOK(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//Send a mock status code
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"mock_key": "mock_value"}`))
-	}))
-	defer server.Close()
-
-	// gin.SetMode(gin.TestMode)
-	// w := httptest.NewRecorder()
-	// ctx, _ := gin.CreateTestContext(w)
-	// ctx.Request = &http.Request{
-	// 	Header: make(http.Header),
-	// 	URL:    &url.URL{Path: "http://localhost:8080/sample"},
-	// }
+func TestManageExternalAPIRequestStatusInternalServerError(t *testing.T) {
 	client := &http.Client{} //TODO: This should be mocked.
 	apiURL := "http://localhost:8080/sample"
-	body, status, err := manageExternalAPIRequest(client, apiURL)
+	body, status, err := manageAPIRequest(client, apiURL)
 	assert.NotNil(t, err)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "Failed to send the API request")
@@ -43,18 +20,16 @@ func TestManageExternalAPIRequestStatusCodeOK(t *testing.T) {
 	assert.Equal(t, status, 500)
 }
 
-func TestHandleExternalAPIResponseError(t *testing.T) {
-	// gin.SetMode(gin.TestMode)
-	// w := httptest.NewRecorder()
-	// ctx, _ := gin.CreateTestContext(w)
-	// ctx.Request = &http.Request{
-	// 	Header: make(http.Header),
-	// 	URL:    &url.URL{},
-	// }
-	resp := &http.Response{}
-	resp.Body = http.NoBody
-	resp.Status = http.StatusText(http.StatusBadGateway)
-	resp.StatusCode = http.StatusBadGateway
+func TestCreateRequest(t *testing.T) {
+	apiURL := "http://localhost:8080/sample"
+	req, err := createRequest(apiURL)
+	assert.NoError(t, err)
+	assert.NotNil(t, req)
+	assert.Equal(t, apiURL, req.URL.String())
+}
+
+func TestHandleAPIResponseError(t *testing.T) {
+	resp := &http.Response{Body: io.NopCloser(bytes.NewBufferString("Hello World")), StatusCode: http.StatusBadGateway, Status: http.StatusText(http.StatusBadGateway)}
 	body, status, err := handleAPIResponse(resp)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "Bad Gateway")
@@ -62,17 +37,8 @@ func TestHandleExternalAPIResponseError(t *testing.T) {
 	assert.Equal(t, status, 500)
 }
 
-func TestHandleExternalAPIResponseNoError(t *testing.T) {
-	// gin.SetMode(gin.TestMode)
-	// w := httptest.NewRecorder()
-	// ctx, _ := gin.CreateTestContext(w)
-	// ctx.Request = &http.Request{
-	// 	Header: make(http.Header),
-	// 	URL:    &url.URL{},
-	// }
-	resp := &http.Response{Body: io.NopCloser(bytes.NewBufferString("Hello World"))}
-	resp.Status = http.StatusText(http.StatusOK)
-	resp.StatusCode = http.StatusOK
+func TestHandleAPIResponseNoError(t *testing.T) {
+	resp := &http.Response{Body: io.NopCloser(bytes.NewBufferString("Hello World")), StatusCode: http.StatusOK, Status: http.StatusText(http.StatusOK)}
 	body, status, err := handleAPIResponse(resp)
 	assert.NoError(t, err)
 	assert.Nil(t, err)
